@@ -137,8 +137,6 @@ Created automatically when the app starts:
 }
 ```
 
-> Login using `"admin"` and empty password to get a token.
-
 ---
 
 ## 📂 Conventions
