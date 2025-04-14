@@ -3,6 +3,10 @@ using System.Text.Json;
 
 namespace DeliveryRentals.API.Middleware
 {
+	/// <summary>
+	/// Middleware responsible for logging requests and handling unhandled exceptions.
+	/// It also ignores logging for static resources and Swagger endpoints.
+	/// </summary>
 	public class RequestLoggingMiddleware
 	{
 		private readonly RequestDelegate _next;
@@ -12,6 +16,12 @@ namespace DeliveryRentals.API.Middleware
 			_next = next;
 		}
 
+		/// <summary>
+		/// Handles the incoming HTTP request, logs exceptions,
+		/// and filters out static resources and Swagger calls.
+		/// </summary>
+		/// <param name="context">The current HTTP context.</param>
+		/// <param name="logger">The logging service to persist error logs.</param>
 		public async Task Invoke(HttpContext context, LoggingService logger)
 		{
 			try
