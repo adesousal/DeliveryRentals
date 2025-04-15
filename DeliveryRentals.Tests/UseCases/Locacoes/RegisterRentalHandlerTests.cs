@@ -1,6 +1,6 @@
 ﻿using DeliveryRentals.Application.UseCases.Rentals;
 using DeliveryRentals.Domain.Entities;
-using DeliveryRentals.Infrastructure.Repositories;
+using DeliveryRentals.Persistence.Repositories;
 using FluentAssertions;
 
 namespace DeliveryRentals.Tests.UseCases.Locacoes
@@ -11,9 +11,10 @@ namespace DeliveryRentals.Tests.UseCases.Locacoes
 		public async Task Must_register_rental_with_courier_using_license_A()
 		{
 			// Arrange
-			var courierRepo = new InMemoryCourierRepository();
-			var motoRepo = new InMemoryMotoRepository();
-			var rentalRepo = new InMemoryRentalRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var courierRepo = new EfCourierRepository(context);
+			var motoRepo = new EfMotoRepository(context);
+			var rentalRepo = new EfRentalRepository(context);
 
 			var courier = new Courier("e1", "João", "123", DateTime.Today.AddYears(-30), "CNH123", "A");
 			await courierRepo.AddAsync(courier);
@@ -38,6 +39,7 @@ namespace DeliveryRentals.Tests.UseCases.Locacoes
 
 			// Assert - locação persistida
 			var rentals = await rentalRepo.GetAllAsync();
+
 			rentals.Should().ContainSingle(l =>
 				l.CourierId == "e1" &&
 				l.MotoId == "m1" &&
@@ -60,9 +62,10 @@ namespace DeliveryRentals.Tests.UseCases.Locacoes
 		[Fact]
 		public async Task Must_fail_if_courier_does_not_have_license_A()
 		{
-			var courierRepo = new InMemoryCourierRepository();
-			var motoRepo = new InMemoryMotoRepository();
-			var rentalRepo = new InMemoryRentalRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var courierRepo = new EfCourierRepository(context);
+			var motoRepo = new EfMotoRepository(context);
+			var rentalRepo = new EfRentalRepository(context);
 
 			var courier = new Courier("e2", "Maria", "999", DateTime.Today.AddYears(-28), "CNH999", "B");
 			await courierRepo.AddAsync(courier);

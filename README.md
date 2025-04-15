@@ -13,6 +13,7 @@ This project follows Clean Architecture principles, SOLID design, and modern bes
 - Courier registration with CNH image upload
 - Motorcycle rental with pricing plans and penalty calculations
 - Request and error logging with user context
+- ✅ **Messaging with Kafka** for domain events
 - Messaging (simulated for now)
 - Swagger with JWT support
 - Test coverage with `xUnit` + `coverlet`
@@ -25,6 +26,7 @@ This project follows Clean Architecture principles, SOLID design, and modern bes
 - ASP.NET Core
 - Entity Framework Core
 - PostgreSQL
+- Kafka (with Confluent platform)
 - JWT Bearer Auth
 - Swagger (Swashbuckle)
 - xUnit, FluentAssertions
@@ -52,6 +54,34 @@ DeliveryRentals/
 - **Courier**: registers themselves and rents motorcycles
 
 JWT tokens must be provided via **Bearer Token** in Swagger or requests.
+
+---
+
+---
+
+## 🔔 Kafka Messaging
+
+The API publishes events such as `MotoCadastradaEvent` to Kafka using the topic `motos`.  
+A background service consumes this topic and stores events where the year is 2024.
+
+Docker Compose includes:
+
+- `kafka: confluentinc/cp-kafka`
+- `zookeeper: confluentinc/cp-zookeeper`
+
+Startup code:
+
+```csharp
+services.AddSingleton<IEventPublisher>(_ =>
+    new KafkaEventPublisher("localhost:9092"));
+services.AddHostedService<KafkaEventConsumerService>();
+```
+
+To create 'motos' topic:
+
+```bash
+docker exec -it deliveryrentals-kafka-1 kafka-topics --bootstrap-server host.docker.internal:9092 --create --topic motos --partitions 1 --replication-factor 1
+```
 
 ---
 

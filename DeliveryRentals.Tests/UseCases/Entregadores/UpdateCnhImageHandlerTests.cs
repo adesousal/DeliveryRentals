@@ -1,7 +1,7 @@
 ﻿using DeliveryRentals.Application.UseCases.Couriers;
 using DeliveryRentals.Domain.Entities;
-using DeliveryRentals.Infrastructure.Repositories;
 using DeliveryRentals.Infrastructure.Storage;
+using DeliveryRentals.Persistence.Repositories;
 using FluentAssertions;
 
 namespace DeliveryRentals.Tests.UseCases.Couriers
@@ -11,11 +11,11 @@ namespace DeliveryRentals.Tests.UseCases.Couriers
 		[Fact]
 		public async Task Must_save_photo_to_existing_courier_record()
 		{
-			var repo = new InMemoryCourierRepository();
+			var repo = new EfCourierRepository(DbContextTestHelper.CreateInMemoryContext());
 			var courier = new Courier("e1", "John", "123", DateTime.Today.AddYears(-30), "CNH1", "A");
 			await repo.AddAsync(courier);
 
-			var storage = new InMemoryCnhStorageService();
+			var storage = new DiskCnhStorageService();
 			var handler = new UpdateCnhImageHandler(repo, storage);
 
 			var fileName = "cnh.png";
@@ -31,10 +31,10 @@ namespace DeliveryRentals.Tests.UseCases.Couriers
 		[Fact]
 		public async Task Must_throw_error_for_invalid_format()
 		{
-			var repo = new InMemoryCourierRepository();
+			var repo = new EfCourierRepository(DbContextTestHelper.CreateInMemoryContext());
 			await repo.AddAsync(new Courier("e1", "João", "123", DateTime.Today, "CNH1", "A"));
 
-			var storage = new InMemoryCnhStorageService();
+			var storage = new DiskCnhStorageService();
 			var handler = new UpdateCnhImageHandler(repo, storage);
 
 			var fileName = "documento.pdf"; // inválido
@@ -49,8 +49,8 @@ namespace DeliveryRentals.Tests.UseCases.Couriers
 		[Fact]
 		public async Task Must_throw_error_for_nonexistent_courier()
 		{
-			var repo = new InMemoryCourierRepository();
-			var storage = new InMemoryCnhStorageService();
+			var repo = new EfCourierRepository(DbContextTestHelper.CreateInMemoryContext());
+			var storage = new DiskCnhStorageService();
 			var handler = new UpdateCnhImageHandler(repo, storage);
 
 			using var stream = new MemoryStream(new byte[] { 1 });
@@ -59,21 +59,6 @@ namespace DeliveryRentals.Tests.UseCases.Couriers
 
 			await act.Should().ThrowAsync<InvalidOperationException>()
 				.WithMessage("Courier not found.");
-		}
-	}
-
-	// In-memory image storage simulation
-	public class InMemoryCnhStorageService : ICnhStorageService
-	{
-		private readonly Dictionary<string, byte[]> _files = new();
-
-		public Task<string> SaveAsync(string courierId, Stream fileStream, string fileName)
-		{
-			var path = $"{courierId}_{fileName}";
-			using var ms = new MemoryStream();
-			fileStream.CopyTo(ms);
-			_files[path] = ms.ToArray();
-			return Task.FromResult(path);
 		}
 	}
 }

@@ -11,7 +11,6 @@ Remove-Item $reportFolder -Recurse -Force -ErrorAction SilentlyContinue
 dotnet test $testProject `
   --collect:"XPlat Code Coverage" `
   --results-directory $outputFolder `
-  --settings coverlet.runsettings
 
 # Pegar caminho do .cobertura.xml
 $coverageFile = Get-ChildItem "$outputFolder/**/coverage.cobertura.xml" -Recurse | Select-Object -First 1

@@ -62,9 +62,11 @@ services.AddAuthorization(options =>
 		policy.Requirements.Add(new RoleRequirement("admin", "Only administrators can access this feature.")));
 });
 
+services.AddHostedService<KafkaEventConsumerService>();
+
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+//app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -72,7 +74,7 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
-app.UseMiddleware<RequestLoggingMiddleware>();
+//app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 
@@ -119,12 +121,11 @@ app.MapControllers();
 app.Run();
 
 
-
 // --- Auxiliary functions ---
 
 void AddRepositories(IServiceCollection services)
 {
-	services.AddScoped<IEventRepository, EfEventoRepository>();
+	services.AddScoped<IEventRepository, EfEventRepository>();
 	services.AddScoped<IMotoRepository, EfMotoRepository>();
 	services.AddScoped<ICourierRepository, EfCourierRepository>();
 	services.AddScoped<IRentalRepository, EfRentalRepository>();
@@ -135,10 +136,10 @@ void AddRepositories(IServiceCollection services)
 void AddServices(IServiceCollection services)
 {
 	services.AddScoped<IEventConsumer, RegisteredMotoConsumer>();
-	services.AddScoped<IEventPublisher, InMemoryEventPublisher>();
 	services.AddScoped<ICnhStorageService>(_ => new DiskCnhStorageService("CnhImages"));
 	services.AddScoped<LoggingService>();
 	services.AddScoped<IUserContextService, UserContextService>();
+	services.AddSingleton<IEventPublisher>(_ => new KafkaEventPublisher("localhost:9092"));	
 }
 
 void ConfigureSwagger(SwaggerGenOptions options)

@@ -1,6 +1,6 @@
 ﻿using DeliveryRentals.Application.UseCases.Motos;
 using DeliveryRentals.Domain.Entities;
-using DeliveryRentals.Infrastructure.Repositories;
+using DeliveryRentals.Persistence.Repositories;
 using FluentAssertions;
 
 namespace DeliveryRentals.Tests.UseCases.Motos
@@ -10,7 +10,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		[Fact]
 		public async Task Must_update_motorcycle_license_plate_when_new_plate_is_valid()
 		{
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 			await repo.AddAsync(new Motorcycle("m1", 2023, "CG", "AAA-1111"));
 
 			var handler = new UpdateMotoPlateHandler(repo);
@@ -30,7 +31,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		[Fact]
 		public async Task Must_throw_error_if_motorcycle_does_not_exist()
 		{
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 			var handler = new UpdateMotoPlateHandler(repo);
 
 			var request = new UpdateMotoPlateRequest
@@ -48,7 +50,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		[Fact]
 		public async Task Must_throw_error_if_new_license_plate_is_already_in_use()
 		{
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 			await repo.AddAsync(new Motorcycle("m1", 2023, "CG", "AAA-1111"));
 			await repo.AddAsync(new Motorcycle("m2", 2023, "Biz", "ZZZ-9999"));
 

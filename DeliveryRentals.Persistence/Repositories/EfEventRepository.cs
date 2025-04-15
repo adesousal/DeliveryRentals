@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DeliveryRentals.Persistence.Repositories
 {
-	public class EfEventoRepository : IEventRepository
+	public class EfEventRepository : IEventRepository
 	{
 		private readonly AppDbContext _context;
 
-		public EfEventoRepository(AppDbContext context)
+		public EfEventRepository(AppDbContext context)
 		{
 			_context = context;
 		}

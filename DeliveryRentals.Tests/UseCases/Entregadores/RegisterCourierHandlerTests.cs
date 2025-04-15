@@ -2,6 +2,8 @@
 using DeliveryRentals.Domain.Entities;
 using DeliveryRentals.Infrastructure.Repositories;
 using DeliveryRentals.Infrastructure.Storage;
+using DeliveryRentals.Persistence.Context;
+using DeliveryRentals.Persistence.Repositories;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -10,8 +12,8 @@ namespace DeliveryRentals.Tests.UseCases.Couriers
 {
 	public class RegisterCourierHandlerTests
 	{
-		private InMemoryCourierRepository _repo = new InMemoryCourierRepository();
-		private InMemoryCnhStorageService _cnhStorage = new InMemoryCnhStorageService();
+		private EfCourierRepository _repo = new EfCourierRepository(DbContextTestHelper.CreateInMemoryContext());
+		private DiskCnhStorageService _cnhStorage = new DiskCnhStorageService();
 
 		[Fact]
 		public async Task Must_register_dcourier_and_save_image()

@@ -1,7 +1,7 @@
 ﻿using DeliveryRentals.Application.UseCases.Motos;
 using DeliveryRentals.Domain.Events;
-using DeliveryRentals.Infrastructure.Messaging;
-using DeliveryRentals.Infrastructure.Repositories;
+using DeliveryRentals.Persistence.Repositories;
+using DeliveryRentals.Tests.Fake;
 using FluentAssertions;
 
 namespace DeliveryRentals.Tests.UseCases.Motos
@@ -11,12 +11,11 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		[Fact]
 		public async Task Must_register_motorcycle_when_license_plate_is_valid()
 		{
-			// Arrange
-			var repository = new InMemoryMotoRepository();
-			var eventConsumer = new TestMotoCadastradaConsumer();
-			var eventPublisher = new InMemoryEventPublisher(eventConsumer);
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repository = new EfMotoRepository(context);
 
-			var handler = new RegisterMotoHandler(repository, eventPublisher);
+			var publisher = new FakeEventPublisher();
+			var handler = new RegisterMotoHandler(repository, publisher);
 
 			var request = new RegisterMotoRequest
 			{
@@ -26,22 +25,21 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 				LicensePlate = "ABC-1234"
 			};
 
-			// Act
 			await handler.HandleAsync(request);
 
-			// Assert
 			var motos = await repository.GetAllAsync();
 			motos.Should().ContainSingle(m => m.LicensePlate == "ABC-1234");
 
-			eventConsumer.Events.Should().ContainSingle(e => e.LicensePlate == "ABC-1234");
+			publisher.PublishedEvents
+				.Should().ContainSingle(e => ((MotoRegisterEvent)e).LicensePlate == "ABC-1234");
 		}
 
 		[Fact]
 		public async Task Must_throw_error_when_license_plate_is_already_in_use()
 		{
-			// Arrange
-			var repository = new InMemoryMotoRepository();
-			var publisher = new InMemoryEventPublisher(new TestMotoCadastradaConsumer());
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repository = new EfMotoRepository(context);
+			var publisher = new FakeEventPublisher();
 
 			var handler = new RegisterMotoHandler(repository, publisher);
 
@@ -63,27 +61,10 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 
 			await handler.HandleAsync(request1);
 
-			// Act
 			var action = async () => await handler.HandleAsync(request2);
 
-			// Assert
 			await action.Should().ThrowAsync<InvalidOperationException>()
 				.WithMessage("License plate already registered");
-		}
-	}
-
-	// 🔧 Test consumer (simulates event listener)
-	public class TestMotoCadastradaConsumer : IEventConsumer
-	{
-		public List<MotoRegisterEvent> Events { get; } = new();
-
-		public Task HandleAsync(string messageJson)
-		{
-			var @event = System.Text.Json.JsonSerializer.Deserialize<MotoRegisterEvent>(messageJson);
-			if (@event != null)
-				Events.Add(@event);
-
-			return Task.CompletedTask;
 		}
 	}
 }

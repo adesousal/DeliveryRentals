@@ -1,6 +1,6 @@
 ﻿using DeliveryRentals.Application.UseCases.Motos;
 using DeliveryRentals.Domain.Entities;
-using DeliveryRentals.Infrastructure.Repositories;
+using DeliveryRentals.Persistence.Repositories;
 using FluentAssertions;
 
 namespace DeliveryRentals.Tests.UseCases.Motos
@@ -10,7 +10,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		[Fact]
 		public async Task Must_return_all_motorcycles_when_no_filter_is_applied()
 		{
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 			await repo.AddAsync(new Motorcycle("1", 2023, "CG", "AAA-1111"));
 			await repo.AddAsync(new Motorcycle("2", 2024, "Biz", "BBB-2222"));
 
@@ -24,7 +25,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		[Fact]
 		public async Task Must_return_only_motorcycle_with_license_plate_matching_filter()
 		{
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 			await repo.AddAsync(new Motorcycle("1", 2023, "CG", "AAA-1111"));
 			await repo.AddAsync(new Motorcycle("2", 2024, "Biz", "ZZZ-9999"));
 
@@ -39,7 +41,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		public async Task Must_return_motorcycle_by_license_plate_case_insensitive()
 		{
 			// Arrange
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 			var moto = new Motorcycle("moto-1", 2024, "Start", "XYZ-1234");
 			await repo.AddAsync(moto);
 
@@ -55,7 +58,8 @@ namespace DeliveryRentals.Tests.UseCases.Motos
 		public async Task Must_return_null_when_license_plate_does_not_exist()
 		{
 			// Arrange
-			var repo = new InMemoryMotoRepository();
+			var context = DbContextTestHelper.CreateInMemoryContext();
+			var repo = new EfMotoRepository(context);
 
 			// Act
 			var result = await repo.GetByLicensePlateAsync("non-existent");

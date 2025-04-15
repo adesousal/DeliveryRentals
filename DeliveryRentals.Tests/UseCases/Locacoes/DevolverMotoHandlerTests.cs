@@ -1,6 +1,7 @@
 ﻿using DeliveryRentals.Application.UseCases.Rentals;
 using DeliveryRentals.Domain.Entities;
 using DeliveryRentals.Infrastructure.Repositories;
+using DeliveryRentals.Persistence.Repositories;
 using FluentAssertions;
 
 namespace DeliveryRentals.Tests.UseCases.Locacoes
@@ -10,7 +11,7 @@ namespace DeliveryRentals.Tests.UseCases.Locacoes
 		[Fact]
 		public async Task Must_apply_normal_rate_if_returned_on_time()
 		{
-			var repo = new InMemoryRentalRepository();
+			var repo = new EfRentalRepository(DbContextTestHelper.CreateInMemoryContext());
 			var start = DateTime.UtcNow.Date;
 			var end = start.AddDays(6);
 
@@ -41,7 +42,7 @@ namespace DeliveryRentals.Tests.UseCases.Locacoes
 		[Fact]
 		public async Task Must_impose_fee_for_early_return_in_7_day_scheme()
 		{
-			var repo = new InMemoryRentalRepository();
+			var repo = new EfRentalRepository(DbContextTestHelper.CreateInMemoryContext());
 			var start = DateTime.UtcNow.Date;
 			var forecast = start.AddDays(6);
 
@@ -75,7 +76,7 @@ namespace DeliveryRentals.Tests.UseCases.Locacoes
 		[Fact]
 		public async Task Must_impose_surcharge_if_returned_late()
 		{
-			var repo = new InMemoryRentalRepository();
+			var repo = new EfRentalRepository(DbContextTestHelper.CreateInMemoryContext());
 			var start = DateTime.UtcNow.Date;
 			var forecast = start.AddDays(14);
 
