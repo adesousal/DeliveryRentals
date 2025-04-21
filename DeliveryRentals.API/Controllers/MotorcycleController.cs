@@ -54,7 +54,7 @@ public class MotorcycleController : ControllerBase
 	/// <summary>
 	/// Check all motorcycles, with optional filter by license plate.
 	/// </summary>
-	/// <param name="licensePlate">Filtro por placa</param>
+	/// <param name="licensePlate">Filter by license plate</param>
 	[HttpGet]
 	[Authorize(Policy = "AdminOnly")]
 	[SwaggerOperation(Summary = "Get all motorcycles", Description = "Returns all motorcycles, filtered by license plate if provided.")]

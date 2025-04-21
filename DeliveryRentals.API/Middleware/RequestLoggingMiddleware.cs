@@ -26,7 +26,7 @@ namespace DeliveryRentals.API.Middleware
 		{
 			try
 			{
-				// Ignora arquivos estáticos e chamadas do Swagger
+				// Ignore static files and Swagger calls
 				var path = context.Request.Path.Value?.ToLower();
 				if (path != null &&
 					(path.StartsWith("/swagger") || path.Contains(".js") || path.Contains(".css") || path.Contains(".ico")))
@@ -57,17 +57,17 @@ namespace DeliveryRentals.API.Middleware
 
 					case UnauthorizedAccessException:
 						statusCode = StatusCodes.Status403Forbidden;
-						messageToClient = "Acesso negado.";
+						messageToClient = "Access denied.";
 						break;
 
 					default:
 						statusCode = StatusCodes.Status500InternalServerError;
-						messageToClient = "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.";
+						messageToClient = "An unexpected error has occurred. Please try again later.";
 						break;
 				}
 
 				context.Response.StatusCode = statusCode;
-				await logger.Error("Erro capturado no middleware", ex, userDisplay);
+				await logger.Error("Error caught in middleware", ex, userDisplay);
 
 				var result = JsonSerializer.Serialize(new { error = messageToClient });
 				await context.Response.WriteAsync(result);

@@ -66,7 +66,7 @@ services.AddHostedService<KafkaEventConsumerService>();
 
 var app = builder.Build();
 
-//app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -74,7 +74,7 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
-//app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 
@@ -110,7 +110,7 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
 	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-	//await db.Database.MigrateAsync();
+	await db.Database.MigrateAsync();
 
 	var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 	var user = new User("admin", "", "admin");
